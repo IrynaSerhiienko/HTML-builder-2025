@@ -1,5 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
+const copyDirectory = require('./../04-copy-directory');
+const mergeStyles = require('./../05-merge-styles');
 
 const projectDistDir = path.join(__dirname, 'project-dist');
 const templateFilePath = path.join(__dirname, 'template.html');
@@ -36,21 +38,6 @@ async function replaceTemplateTags() {
   await fs.writeFile(outputHtmlFile, templateContent);
 }
 
-// Function for combining styles
-async function mergeStyles() {
-  const styles = [];
-  const styleFiles = await fs.readdir(stylesDir);
-
-  for (const file of styleFiles) {
-    if (path.extname(file) === '.css') {
-      const content = await fs.readFile(path.join(stylesDir, file), 'utf-8');
-      styles.push(content);
-    }
-  }
-  // Write combined styles in style.css
-  await fs.writeFile(outputCssFile, styles.join('\n'));
-}
-
 // Function for copying assets
 async function copyAssets() {
   const outputAssetsDir = path.join(projectDistDir, 'assets');
@@ -72,31 +59,12 @@ async function copyAssets() {
   }
 }
 
-// Function for copying directories
-async function copyDirectory(srcDir, destDir) {
-  await fs.mkdir(destDir, { recursive: true });
-
-  const files = await fs.readdir(srcDir);
-
-  for (const file of files) {
-    const srcPath = path.join(srcDir, file);
-    const destPath = path.join(destDir, file);
-
-    const stat = await fs.stat(srcPath);
-    if (stat.isDirectory()) {
-      await copyDirectory(srcPath, destPath);
-    } else {
-      await fs.copyFile(srcPath, destPath);
-    }
-  }
-}
-
 // Main function for building the project
 async function buildPage() {
   try {
     await fs.mkdir(projectDistDir, { recursive: true });
     await replaceTemplateTags();
-    await mergeStyles();
+    await mergeStyles(stylesDir, projectDistDir, outputCssFile);
     await copyAssets();
     console.log('Page has been built successfully!');
   } catch (error) {

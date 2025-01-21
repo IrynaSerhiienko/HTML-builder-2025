@@ -1,11 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const stylesDir = path.join(__dirname, 'styles');
-const outputDir = path.join(__dirname, 'project-dist');
-const bundleFile = path.join(outputDir, 'bundle.css');
-
-async function mergeStyles() {
+async function mergeStyles(stylesDir, outputDir, bundleFile) {
   try {
     // Create the 'project-dist' folder if it doesn't exist
     await fs.promises.mkdir(outputDir, { recursive: true });
@@ -36,4 +32,11 @@ async function mergeStyles() {
   }
 }
 
-mergeStyles();
+if (require.main === module) {
+  const stylesDir = path.join(__dirname, 'styles');
+  const outputDir = path.join(__dirname, 'project-dist');
+  const bundleFile = path.join(outputDir, 'bundle.css');
+  mergeStyles(stylesDir, outputDir, bundleFile);
+}
+
+module.exports = mergeStyles;
